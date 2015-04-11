@@ -1,0 +1,1 @@
+Pytunes requires avbin.dll in the project folder. Modules used are wxPython for GUI and Mutgen for music tagging.
