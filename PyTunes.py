@@ -9,14 +9,15 @@ from wx.lib.mixins.listctrl import ListCtrlAutoWidthMixin
 from wx.lib.mixins.listctrl import ColumnSorterMixin
 import pyglet
 
+song = "01 - Nothing But Trouble.mp3"
+music = pyglet.resource.media(song)
+info = MP3(song)
 
-example_song = MP3("01 - Nothing But Trouble.mp3")
-
-m, s = divmod(example_song.info.length, 60)
+m, s = divmod(info.info.length, 60)
 h, m = divmod(m, 60)
 
 songs = {
-1 : (example_song['TIT2'].text[0], example_song['TPE1'].text[0], "%d:%02d:%02d" % (h, m, s))
+1 : (info['TIT2'].text[0], info['TPE1'].text[0], "%d:%02d:%02d" % (h, m, s))
 }
 
 
@@ -30,16 +31,21 @@ class SortedListCtrl(wx.ListCtrl, ColumnSorterMixin):
         return self
     
 class Songs(wx.Frame):
+    
     def __init__(self, parent, id, title):
-        wx.Frame.__init__(self, parent, id, title, size=(380, 230))
-        
+        wx.Frame.__init__(self, parent, id, title, size=(600, 500))
+
+        vbox = wx.BoxSizer(wx.VERTICAL)
         hbox = wx.BoxSizer(wx.HORIZONTAL)
+        hbox2 = wx.BoxSizer(wx.HORIZONTAL)
 
         panel = wx.Panel(self, -1)
+
         
-        self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnDoubleClick)
-        
-        self.list = SortedListCtrl(panel)
+        leftPanel = wx.Panel(panel, -1)
+        rightPanel = wx.Panel(panel, -1)     
+
+        self.list = SortedListCtrl(rightPanel)
         self.list.InsertColumn(0, 'Title', width=140)
         self.list.InsertColumn(1, 'Artist', width=130)
         self.list.InsertColumn(2, 'Length', wx.LIST_FORMAT_RIGHT, 90)
@@ -53,21 +59,62 @@ class Songs(wx.Frame):
             self.list.SetItemData(index, key)
 
 
+        vbox2 = wx.BoxSizer(wx.VERTICAL)
+
+        sel = wx.Button(leftPanel, -1, 'Play/Pause', size=(100, -1))
+        des = wx.Button(leftPanel, -1, 'Exit', size=(100, -1))
+
+
+        self.Bind(wx.EVT_BUTTON, self.PlayPause, id=sel.GetId())
+        self.Bind(wx.EVT_BUTTON, self.ExitApp, id=des.GetId())
+
+        vbox2.Add(sel, 0, wx.TOP, 5)
+        vbox2.Add(des)
+
+        leftPanel.SetSizer(vbox2)
+
+        vbox.Add(self.list, 1, wx.EXPAND | wx.TOP, 3)
+        vbox.Add((-1, 10))
+
+        
+        rightPanel.SetSizer(vbox)
+
+        hbox.Add(leftPanel, 0, wx.EXPAND | wx.RIGHT, 5)
+        hbox.Add(rightPanel, 1, wx.EXPAND)
+        hbox.Add((3, -1))
+
         hbox.Add(self.list, 1, wx.EXPAND)
         panel.SetSizer(hbox)
 
         self.Centre()
         self.Show(True)
         
-    def OnDoubleClick(self, event):
-        if pyglet.media.Player.playing == True:
-            player.pause()
-        music = pyglet.resource.media('01 - Nothing But Trouble.mp3')
+    def PlayPause(self, event):
         music.play()
+       
+    def OnDoubleClick(self, event):
+        if self.player.playing == False:
+            music.play()
+        else:
+            music.pause()
         event.Skip()
+        
+    def OnSliderScroll(self, e):
+        
+        obj = e.GetEventObject()
+        val = obj.GetValue()
+        
+        self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnDoubleClick)
+        
 
-app = wx.App()
-Songs(None, -1, 'PyTunes')
-app.MainLoop()
+        
+    def ExitApp(self, event):
+        self.Close()
+
+if __name__ == '__main__':
+    player = pyglet.media.Player()
+    app = wx.App()
+    Songs(None, -1, 'PyTunes')
+    app.MainLoop()
 
 
