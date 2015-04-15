@@ -31,7 +31,7 @@ class SortedListCtrl(wx.ListCtrl, ColumnSorterMixin):
         return self
     
 class Songs(wx.Frame):
-    
+    player = pyglet.media.Player()
     def __init__(self, parent, id, title):
         wx.Frame.__init__(self, parent, id, title, size=(600, 500))
 
@@ -40,11 +40,10 @@ class Songs(wx.Frame):
         hbox2 = wx.BoxSizer(wx.HORIZONTAL)
 
         panel = wx.Panel(self, -1)
-
-        
         leftPanel = wx.Panel(panel, -1)
         rightPanel = wx.Panel(panel, -1)     
 
+        self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnDoubleClick)
         self.list = SortedListCtrl(rightPanel)
         self.list.InsertColumn(0, 'Title', width=140)
         self.list.InsertColumn(1, 'Artist', width=130)
@@ -61,15 +60,18 @@ class Songs(wx.Frame):
 
         vbox2 = wx.BoxSizer(wx.VERTICAL)
 
-        sel = wx.Button(leftPanel, -1, 'Play/Pause', size=(100, -1))
-        des = wx.Button(leftPanel, -1, 'Exit', size=(100, -1))
+        ply = wx.Button(leftPanel, -1, 'Play', size=(100, -1))
+        pse = wx.Button(leftPanel, -1, 'Pause', size=(100, -1))
+        ext = wx.Button(leftPanel, -1, 'Exit', size=(100, -1))
 
 
-        self.Bind(wx.EVT_BUTTON, self.PlayPause, id=sel.GetId())
-        self.Bind(wx.EVT_BUTTON, self.ExitApp, id=des.GetId())
+        self.Bind(wx.EVT_BUTTON, self.Play, id=ply.GetId())
+        self.Bind(wx.EVT_BUTTON, self.Pause, id=pse.GetId())
+        self.Bind(wx.EVT_BUTTON, self.ExitApp, id=ext.GetId())
 
-        vbox2.Add(sel, 0, wx.TOP, 5)
-        vbox2.Add(des)
+        vbox2.Add(ply, 0, wx.TOP, 5)
+        vbox2.Add(pse)
+        vbox2.Add(ext)
 
         leftPanel.SetSizer(vbox2)
 
@@ -89,24 +91,16 @@ class Songs(wx.Frame):
         self.Centre()
         self.Show(True)
         
-    def PlayPause(self, event):
-        music.play()
-       
-    def OnDoubleClick(self, event):
-        if self.player.playing == False:
-            music.play()
-        else:
-            music.pause()
+    def Play(self, event):
+        self.player.play()
         event.Skip()
-        
-    def OnSliderScroll(self, e):
-        
-        obj = e.GetEventObject()
-        val = obj.GetValue()
-        
-        self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnDoubleClick)
-        
 
+    def Pause(self, event):
+        self.player.pause()
+        event.Skip()
+
+    def OnDoubleClick(self, event):
+        self.player.queue(music)
         
     def ExitApp(self, event):
         self.Close()
