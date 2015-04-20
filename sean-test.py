@@ -43,7 +43,7 @@ class Songs(wx.Frame):
         self.jpgs = GetJpgList("./IMAGES")
         self.CurrentJpg = 0
 
-        self.MaxImageSize = 400
+        self.MaxImageSize = 200
 
         
         
