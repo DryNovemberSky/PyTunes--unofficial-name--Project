@@ -40,7 +40,8 @@ class Songs(wx.Frame):
         Images addition to frame
         '''
          #find images in the image folder
-        self.jpgs = GetJpgList("./IMAGES")
+        self.artist_name = "Phantogram"
+        self.jpgs = GetJpgList("./IMAGES/" + self.artist_name)
         self.CurrentJpg = 0
 
         self.MaxImageSize = 200
