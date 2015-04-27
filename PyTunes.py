@@ -8,6 +8,7 @@ import wx
 from wx.lib.mixins.listctrl import ListCtrlAutoWidthMixin
 from wx.lib.mixins.listctrl import ColumnSorterMixin
 import pyglet
+import time
 
 song = "01 - Nothing But Trouble.mp3"
 music = pyglet.resource.media(song)
@@ -16,9 +17,14 @@ info = MP3(song)
 m, s = divmod(info.info.length, 60)
 h, m = divmod(m, 60)
 
+
 songs = {
 1 : (info['TIT2'].text[0], info['TPE1'].text[0], "%d:%02d:%02d" % (h, m, s))
 }
+
+artist_name = info['TPE1'].text[0]
+length = "%d:%02d:%02d" % (h, m, s)
+
 
 
 class SortedListCtrl(wx.ListCtrl, ColumnSorterMixin):
@@ -29,7 +35,8 @@ class SortedListCtrl(wx.ListCtrl, ColumnSorterMixin):
 
     def GetListCtrl(self):
         return self
-    
+
+#This "Songs" class runs the actual frame for PyTunes 
 class Songs(wx.Frame):
     player = pyglet.media.Player()
     def __init__(self, parent, id, title):
@@ -40,10 +47,12 @@ class Songs(wx.Frame):
         Images addition to frame
         '''
          #find images in the image folder
-        self.artist_name = "Phantogram"
-        self.jpgs = GetJpgList("./IMAGES/" + self.artist_name)
+        self.jpgs = GetJpgList("./IMAGES/" + artist_name)
         self.CurrentJpg = 0
 
+
+        self.mp3s = GetMP3List("./MP3s/")
+        
         self.MaxImageSize = 200
 
         
@@ -53,12 +62,7 @@ class Songs(wx.Frame):
         hbox2 = wx.BoxSizer(wx.HORIZONTAL)
 
         
-
-        
-
-
-        
-        
+        #Add panels to the Frame
         panel = wx.Panel(self, -1)
         leftPanel = wx.Panel(panel, -1)
         rightPanel = wx.Panel(panel, -1)
@@ -76,6 +80,7 @@ class Songs(wx.Frame):
         self.list.InsertColumn(1, 'Artist', width=130)
         self.list.InsertColumn(2, 'Length', wx.LIST_FORMAT_RIGHT, 90)
 
+        #Song metadata pull here?
         items = songs.items()
 
         for key, data in items:
@@ -87,18 +92,32 @@ class Songs(wx.Frame):
 
         vbox2 = wx.BoxSizer(wx.VERTICAL)
 
+        #Create buttons and place them in the left panel
         ply = wx.Button(leftPanel, -1, 'Play', size=(100, -1))
         pse = wx.Button(leftPanel, -1, 'Pause', size=(100, -1))
         ext = wx.Button(leftPanel, -1, 'Exit', size=(100, -1))
         nextpic = wx.Button(leftPanel, -1, "Next Picture", size = (100, -1))
         
+        #slider addition here
+        slid = wx.Slider(rightPanel, value = 0, minValue = 0, maxValue = 500, pos = (-1,-1), size = (250,-1), style = wx.SL_HORIZONTAL)
+        
 
-
+        
         self.Bind(wx.EVT_BUTTON, self.Play, id=ply.GetId())
         self.Bind(wx.EVT_BUTTON, self.Pause, id=pse.GetId())
         self.Bind(wx.EVT_BUTTON, self.ExitApp, id=ext.GetId())
         self.Bind(wx.EVT_BUTTON, self.SHOWNEXT, id = nextpic.GetId())
+        self.Bind(wx.EVT_SCROLL, self.OnSlideScroll)
 
+        #Print current position of song and length. txt1 = current spot, txt2 = end length
+        txt2 = wx.StaticText(rightPanel, label= length, pos=(-1,-1))
+        self.current_time = 0
+        txt1 = wx.StaticText(rightPanel, label = str(self.current_time), pos=(-1,-1))
+
+        self.CurrentTime()
+
+    
+        
         vbox2.Add(ply, 0, wx.TOP, 5)
         vbox2.Add(pse)
         vbox2.Add(ext)
@@ -107,6 +126,9 @@ class Songs(wx.Frame):
         leftPanel.SetSizer(vbox2)
 
         vbox.Add(self.list, 1, wx.EXPAND | wx.TOP, 3)
+        vbox.Add(slid, 1, wx.EXPAND)
+        vbox.Add(txt2, 1, wx.EXPAND)
+        vbox.Add(txt1,1,wx.EXPAND)
         vbox.Add((-1, 10))
 
          
@@ -145,10 +167,20 @@ class Songs(wx.Frame):
 
     def OnDoubleClick(self, event):
         self.player.queue(music)
-        
+
+    def OnSlideScroll(self, event):
+        self.current_time = 0
     def ExitApp(self, event):
         self.Close()
 
+    def CurrentTime(self):
+        while self.player.play():
+            time.sleep(1)
+            self.current_time = self.current_time + 1
+
+            val = self.current_time
+
+            txt1.SetLabel(str(val))
     def SHOWNEXT(self, event = None):
         PIC = wx.Image(self.jpgs[self.CurrentJpg], wx.BITMAP_TYPE_JPEG)
 
@@ -166,8 +198,6 @@ class Songs(wx.Frame):
 
         self.Image.SetBitmap(wx.BitmapFromImage(PIC))
 
-        #self.Fit()
-        #self.Layout()
         self.Refresh
 
         #Run through the list of images and if the last image is reached, start over
@@ -179,6 +209,13 @@ def GetJpgList(dir):
     jpgs = [f for f in os.listdir(dir) if f[-4:] == ".jpg"]
     # print "JPGS are:", jpgs
     return [os.path.join(dir, f) for f in jpgs]
+
+
+def GetMP3List(dir):
+    mp3s = [f for f in os.listdir(dir) if f[-4] == ".mp3"]
+    print "MP3s are:", mp3s
+    return [os.path.join(dir,f) for f in mp3s]
+
 
 if __name__ == '__main__':
     player = pyglet.media.Player()
