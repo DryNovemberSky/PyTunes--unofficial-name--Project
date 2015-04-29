@@ -1,3 +1,12 @@
+'''
+#Title: Project 3- pyTunes
+#Authors : Sean McCarthy and Nick Drinovsky
+#Description: pyTunes(unofficial name) is a library of sound files. When you play a song, images relating to that song will display.
+#Date: Week 17. 5/13/2015. 
+'''
+
+
+
 import os
 import sys
 import mutagen
@@ -50,7 +59,9 @@ class Songs(wx.Frame):
         self.jpgs = GetJpgList("./IMAGES/" + artist_name)
         self.CurrentJpg = 0
 
+
         self.mp3s = GetMP3List("./MP3s/")
+        
         self.MaxImageSize = 200
 
         
@@ -70,6 +81,7 @@ class Songs(wx.Frame):
 
         self.Image = wx.StaticBitmap(picPanel, bitmap = wx.EmptyBitmap(self.MaxImageSize, self.MaxImageSize))
 
+        
         self.SHOWNEXT()
 
         self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnDoubleClick)
@@ -125,8 +137,8 @@ class Songs(wx.Frame):
 
         vbox.Add(self.list, 1, wx.EXPAND | wx.TOP, 3)
         vbox.Add(slid, 1, wx.EXPAND)
-        vbox.Add(txt2, 1, wx.EXPAND)
-        vbox.Add(txt1,1,wx.EXPAND)
+        vbox.Add(txt1, 1)
+        vbox.Add(txt2,1)
         vbox.Add((-1, 10))
 
          
@@ -136,7 +148,7 @@ class Songs(wx.Frame):
         
         hbox.Add(leftPanel, 0, wx.EXPAND | wx.RIGHT, 5)
         hbox.Add(rightPanel, 1, wx.EXPAND)
-        hbox.Add(picPanel, 2, wx.EXPAND)
+        hbox.Add(picPanel, 2)
         hbox.Add((3, -1))
 
         
@@ -158,7 +170,7 @@ class Songs(wx.Frame):
     def Play(self, event):
         self.player.play()
         event.Skip()
-
+        
     def Pause(self, event):
         self.player.pause()
         event.Skip()
@@ -179,6 +191,7 @@ class Songs(wx.Frame):
             val = self.current_time
 
             txt1.SetLabel(str(val))
+    
     def SHOWNEXT(self, event = None):
         PIC = wx.Image(self.jpgs[self.CurrentJpg], wx.BITMAP_TYPE_JPEG)
 
@@ -208,16 +221,26 @@ def GetJpgList(dir):
     # print "JPGS are:", jpgs
     return [os.path.join(dir, f) for f in jpgs]
 
+
 def GetMP3List(dir):
-    mp3s = [f for f in os.listdir(dir) if f[-4] == ".mp3"]
+    mp3s = [f for f in os.listdir(dir) if f[-4:] == ".mp3"]
     print "MP3s are:", mp3s
     return [os.path.join(dir,f) for f in mp3s]
+
+
+
 
 if __name__ == '__main__':
     player = pyglet.media.Player()
     app = wx.App()
     Songs(None, -1, 'PyTunes')
     app.MainLoop()
+
+
+
+
+
+
 
 
 
