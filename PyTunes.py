@@ -109,8 +109,8 @@ class Songs(wx.Frame):
         nextpic = wx.Button(leftPanel, -1, "Next Picture", size = (100, -1))
         
         #slider addition here
-        slid = wx.Slider(rightPanel, value = 0, minValue = 0, maxValue = 500, pos = (-1,-1), size = (250,-1), style = wx.SL_HORIZONTAL)
-        
+        slid = wx.Slider(rightPanel, -1, value = 0, minValue = 0, maxValue = 500, pos = (-1,-1), size = (250,-1), style = wx.SL_AUTOTICKS | wx.SL_LABELS)
+        slid.SetTickFreq(50,1)
 
         
         self.Bind(wx.EVT_BUTTON, self.Play, id=ply.GetId())
@@ -119,10 +119,6 @@ class Songs(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.SHOWNEXT, id = nextpic.GetId())
         self.Bind(wx.EVT_SCROLL, self.OnSlideScroll)
 
-        #Print current position of song and length. txt1 = current spot, txt2 = end length
-        txt2 = wx.StaticText(rightPanel, label= length, pos=(-1,-1))
-        self.current_time = 0
-        txt1 = wx.StaticText(rightPanel, label = str(self.current_time), pos=(-1,-1))
 
         self.CurrentTime()
 
@@ -137,8 +133,6 @@ class Songs(wx.Frame):
 
         vbox.Add(self.list, 1, wx.EXPAND | wx.TOP, 3)
         vbox.Add(slid, 1, wx.EXPAND)
-        vbox.Add(txt1, 1)
-        vbox.Add(txt2,1)
         vbox.Add((-1, 10))
 
          
@@ -233,5 +227,16 @@ def GetMP3List(dir):
 if __name__ == '__main__':
     player = pyglet.media.Player()
     app = wx.App()
-    Songs(None, -1, 'PyTunes')
+    Songs(None, -1, 'pyTunes')
     app.MainLoop()
+
+
+
+
+
+
+
+
+
+
+
