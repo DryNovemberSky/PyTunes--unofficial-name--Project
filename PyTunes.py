@@ -6,7 +6,6 @@
 '''
 
 
-
 import os
 import sys
 import mutagen
@@ -19,21 +18,14 @@ from wx.lib.mixins.listctrl import ColumnSorterMixin
 import pyglet
 import time
 
-song = "01 - Nothing But Trouble.mp3"
-music = pyglet.resource.media(song)
-info = MP3(song)
+pyglet.resource.path = ['./MP3s/']
+pyglet.resource.reindex()
 
-m, s = divmod(info.info.length, 60)
-h, m = divmod(m, 60)
+songs = {}
 
-
-songs = {
-1 : (info['TIT2'].text[0], info['TPE1'].text[0], "%d:%02d:%02d" % (h, m, s))
-}
-
-artist_name = info['TPE1'].text[0]
-length = "%d:%02d:%02d" % (h, m, s)
-
+artist_name = "Phantogram"
+length = 0
+currentdir = os.getcwd()
 
 
 class SortedListCtrl(wx.ListCtrl, ColumnSorterMixin):
@@ -47,6 +39,7 @@ class SortedListCtrl(wx.ListCtrl, ColumnSorterMixin):
 
 #This "Songs" class runs the actual frame for PyTunes 
 class Songs(wx.Frame):
+
     player = pyglet.media.Player()
     def __init__(self, parent, id, title):
         wx.Frame.__init__(self, parent, id, title, size=(800, 600))
@@ -58,10 +51,6 @@ class Songs(wx.Frame):
          #find images in the image folder
         self.jpgs = GetJpgList("./IMAGES/" + artist_name)
         self.CurrentJpg = 0
-
-
-        self.mp3s = GetMP3List("./MP3s/")
-        
         self.MaxImageSize = 200
 
         
@@ -81,14 +70,14 @@ class Songs(wx.Frame):
 
         self.Image = wx.StaticBitmap(picPanel, bitmap = wx.EmptyBitmap(self.MaxImageSize, self.MaxImageSize))
 
-        
         self.SHOWNEXT()
 
-        self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnDoubleClick)
         self.list = SortedListCtrl(rightPanel)
+
         self.list.InsertColumn(0, 'Title', width=140)
-        self.list.InsertColumn(1, 'Artist', width=130)
-        self.list.InsertColumn(2, 'Length', wx.LIST_FORMAT_RIGHT, 90)
+        self.list.InsertColumn(1, 'Artist', width=140)
+        self.list.InsertColumn(2, 'Album', width=140)
+        self.list.InsertColumn(3, 'Length', wx.LIST_FORMAT_RIGHT, 90)
 
         #Song metadata pull here?
         items = songs.items()
@@ -97,8 +86,10 @@ class Songs(wx.Frame):
             index = self.list.InsertStringItem(sys.maxint, data[0])
             self.list.SetStringItem(index, 1, data[1])
             self.list.SetStringItem(index, 2, data[2])
+            self.list.SetStringItem(index, 3, data[3])
             self.list.SetItemData(index, key)
 
+        self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnDoubleClick, self.list)
 
         vbox2 = wx.BoxSizer(wx.VERTICAL)
 
@@ -119,11 +110,9 @@ class Songs(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.SHOWNEXT, id = nextpic.GetId())
         self.Bind(wx.EVT_SCROLL, self.OnSlideScroll)
 
-
         self.CurrentTime()
 
     
-        
         vbox2.Add(ply, 0, wx.TOP, 5)
         vbox2.Add(pse)
         vbox2.Add(ext)
@@ -164,18 +153,27 @@ class Songs(wx.Frame):
     def Play(self, event):
         self.player.play()
         event.Skip()
-        
+
     def Pause(self, event):
         self.player.pause()
         event.Skip()
 
     def OnDoubleClick(self, event):
-        self.player.queue(music)
+        os.chdir('./MP3s/')
+        selection = self.list.GetFocusedItem()
+        music = songs[selection]
+        song = music[4]
+        s = pyglet.resource.media(song)
+        self.player.queue(s)
+        os.chdir(currentdir)
+
 
     def OnSlideScroll(self, event):
         self.current_time = 0
+        
     def ExitApp(self, event):
         self.Close()
+
 
     def CurrentTime(self):
         while self.player.play():
@@ -185,7 +183,7 @@ class Songs(wx.Frame):
             val = self.current_time
 
             txt1.SetLabel(str(val))
-    
+            
     def SHOWNEXT(self, event = None):
         PIC = wx.Image(self.jpgs[self.CurrentJpg], wx.BITMAP_TYPE_JPEG)
 
@@ -202,7 +200,7 @@ class Songs(wx.Frame):
         #Go from image to bitmap
 
         self.Image.SetBitmap(wx.BitmapFromImage(PIC))
-
+        
         self.Refresh
 
         #Run through the list of images and if the last image is reached, start over
@@ -212,31 +210,25 @@ class Songs(wx.Frame):
 
 def GetJpgList(dir):
     jpgs = [f for f in os.listdir(dir) if f[-4:] == ".jpg"]
-    # print "JPGS are:", jpgs
     return [os.path.join(dir, f) for f in jpgs]
 
 
-def GetMP3List(dir):
-    mp3s = [f for f in os.listdir(dir) if f[-4:] == ".mp3"]
-    print "MP3s are:", mp3s
-    return [os.path.join(dir,f) for f in mp3s]
-
-
-
+def GetMP3List(dict, dir):
+        mp3 = [f for f in os.listdir(dir) if f[-4:] == ".mp3"]
+        os.chdir(dir)
+        y = len(mp3)
+        x = 0
+        while x < y:
+            music = MP3(mp3[x])
+            m, s = divmod(music.info.length, 60)
+            h, m = divmod(m, 60)
+            songs[x] =(music['TIT2'].text[0], music['TPE1'].text[0], music['TALB'].text[0], "%d:%02d:%02d" % (h, m, s),  (mp3[x]))
+            x += 1
+        os.chdir(currentdir)
 
 if __name__ == '__main__':
+    GetMP3List(songs, "./MP3s/")
     player = pyglet.media.Player()
     app = wx.App()
     Songs(None, -1, 'pyTunes')
     app.MainLoop()
-
-
-
-
-
-
-
-
-
-
-
