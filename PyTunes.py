@@ -41,10 +41,9 @@ class SortedListCtrl(wx.ListCtrl, ColumnSorterMixin):
 class Songs(wx.Frame):
 
     player = pyglet.media.Player()
-    player.eos_action = player.EOS_NEXT
+    player.eos_action = player.EOS_PAUSE
     def __init__(self, parent, id, title):
         wx.Frame.__init__(self, parent, id, title, size=(800, 600))
-
         
         '''
         Images addition to frame
@@ -163,10 +162,12 @@ class Songs(wx.Frame):
         event.Skip()
         
     def Stop(self, event):
-        while self.player.playing:
-           self.player.next()
-            
+        self.player.pause()
+        self.player = pyglet.media.Player()
+           
     def OnDoubleClick(self, event):
+        self.player.pause()
+        self.player = pyglet.media.Player()
         os.chdir('./MP3s/')
         selection = self.list.GetFocusedItem()
         music = songs[selection]
@@ -180,6 +181,7 @@ class Songs(wx.Frame):
         self.current_time = 0
         
     def ExitApp(self, event):
+        self.player.pause()
         self.Close()
 
 
@@ -236,7 +238,6 @@ def GetMP3List(dict, dir):
 
 if __name__ == '__main__':
     GetMP3List(songs, "./MP3s/")
-    player = pyglet.media.Player()
     app = wx.App()
     Songs(None, -1, 'pyTunes')
     app.MainLoop()
