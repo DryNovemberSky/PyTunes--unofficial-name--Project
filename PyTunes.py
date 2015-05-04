@@ -41,6 +41,7 @@ class SortedListCtrl(wx.ListCtrl, ColumnSorterMixin):
 class Songs(wx.Frame):
 
     player = pyglet.media.Player()
+    player.eos_action = player.EOS_NEXT
     def __init__(self, parent, id, title):
         wx.Frame.__init__(self, parent, id, title, size=(800, 600))
 
@@ -96,6 +97,7 @@ class Songs(wx.Frame):
         #Create buttons and place them in the left panel
         ply = wx.Button(leftPanel, -1, 'Play', size=(100, -1))
         pse = wx.Button(leftPanel, -1, 'Pause', size=(100, -1))
+        stp = wx.Button(leftPanel, -1, 'Stop', size=(100, -1))
         ext = wx.Button(leftPanel, -1, 'Exit', size=(100, -1))
         nextpic = wx.Button(leftPanel, -1, "Next Picture", size = (100, -1))
         
@@ -106,6 +108,7 @@ class Songs(wx.Frame):
         
         self.Bind(wx.EVT_BUTTON, self.Play, id=ply.GetId())
         self.Bind(wx.EVT_BUTTON, self.Pause, id=pse.GetId())
+        self.Bind(wx.EVT_BUTTON, self.Stop, id=stp.GetId())
         self.Bind(wx.EVT_BUTTON, self.ExitApp, id=ext.GetId())
         self.Bind(wx.EVT_BUTTON, self.SHOWNEXT, id = nextpic.GetId())
         self.Bind(wx.EVT_SCROLL, self.OnSlideScroll)
@@ -115,6 +118,7 @@ class Songs(wx.Frame):
     
         vbox2.Add(ply, 0, wx.TOP, 5)
         vbox2.Add(pse)
+        vbox2.Add(stp)
         vbox2.Add(ext)
         vbox2.Add(nextpic)
 
@@ -157,15 +161,21 @@ class Songs(wx.Frame):
     def Pause(self, event):
         self.player.pause()
         event.Skip()
-
+        
+    def Stop(self, event):
+        if self.player.playing:
+           self.player.next()
+            
     def OnDoubleClick(self, event):
-        os.chdir('./MP3s/')
-        selection = self.list.GetFocusedItem()
-        music = songs[selection]
-        song = music[4]
-        s = pyglet.resource.media(song)
-        self.player.queue(s)
-        os.chdir(currentdir)
+        if self.player.playing:
+            self.player.pause()
+            os.chdir('./MP3s/')
+            selection = self.list.GetFocusedItem()
+            music = songs[selection]
+            song = music[4]
+            s = pyglet.resource.media(song)
+            self.player.play(s)
+            os.chdir(currentdir)
 
 
     def OnSlideScroll(self, event):
