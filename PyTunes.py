@@ -163,20 +163,18 @@ class Songs(wx.Frame):
         event.Skip()
         
     def Stop(self, event):
-        if self.player.playing:
+        while self.player.playing:
            self.player.next()
             
     def OnDoubleClick(self, event):
-        if self.player.playing:
-            self.player.pause()
-            os.chdir('./MP3s/')
-            selection = self.list.GetFocusedItem()
-            music = songs[selection]
-            song = music[4]
-            s = pyglet.resource.media(song)
-            self.player.play(s)
-            os.chdir(currentdir)
-
+        os.chdir('./MP3s/')
+        selection = self.list.GetFocusedItem()
+        music = songs[selection]
+        song = music[4]
+        s = pyglet.resource.media(song)
+        self.player.queue(s)
+        self.player.play()
+        os.chdir(currentdir)
 
     def OnSlideScroll(self, event):
         self.current_time = 0
