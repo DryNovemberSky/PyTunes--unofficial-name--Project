@@ -44,13 +44,13 @@ class Songs(wx.Frame):
     player = pyglet.media.Player()
     player.eos_action = player.EOS_PAUSE
     def __init__(self, parent, id, title):
-        wx.Frame.__init__(self, parent, id, title, size=(800, 600))
+        wx.Frame.__init__(self, parent, id, title, size=(1000, 600))
         
         '''
         Images addition to frame
         '''
          #find images in the image folder
-        self.jpgs = GetJpgList("./IMAGES/" + self.artist_name + "/" + self.album_name)
+        self.jpgs = GetJpgList("./ALBUMART/" + self.artist_name + "/" + self.album_name)
         self.CurrentJpg = 0
         self.MaxImageSize = 200
 
@@ -67,7 +67,7 @@ class Songs(wx.Frame):
         rightPanel = wx.Panel(panel, -1)
         picPanel = wx.Panel(panel, -1)
 
-        #draw an empty image box that we will replace with files from the IMAGES folder
+        #draw an empty image box that we will replace with files from the ALBUMART folder
 
         self.Image = wx.StaticBitmap(picPanel, bitmap = wx.EmptyBitmap(self.MaxImageSize, self.MaxImageSize))
 
@@ -179,14 +179,14 @@ class Songs(wx.Frame):
         os.chdir(currentdir)
         self.artist_name = music[1]
         self.album_name = music[2]
-        if (os.path.exists("./IMAGES/" + self.artist_name + "/" + self.album_name)):
-            self.jpgs = GetJpgList("./IMAGES/" + self.artist_name + "/" + self.album_name)
+        if (os.path.exists("./ALBUMART/" + self.artist_name + "/" + self.album_name)):
+            self.jpgs = GetJpgList("./ALBUMART/" + self.artist_name + "/" + self.album_name)
             self.Image.Update()
             self.SHOWNEXT()
         else:
             self.artist_name = "Default"
             self.album_name = "Default"
-            self.jpgs = GetJpgList("./IMAGES/" + self.artist_name + "/" + self.album_name)
+            self.jpgs = GetJpgList("./ALBUMART/" + self.artist_name + "/" + self.album_name)
             self.Image.Update()
             self.SHOWNEXT()
             
