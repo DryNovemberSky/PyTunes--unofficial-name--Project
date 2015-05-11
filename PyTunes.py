@@ -52,7 +52,7 @@ class Songs(wx.Frame):
          #find images in the image folder
         self.jpgs = GetJpgList("./ALBUMART/" + self.artist_name + "/" + self.album_name)
         self.CurrentJpg = 0
-        self.MaxImageSize = 200
+        self.MaxImageSize = 250
 
         
         
