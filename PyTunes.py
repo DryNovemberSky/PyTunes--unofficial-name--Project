@@ -23,7 +23,7 @@ pyglet.resource.reindex()
 
 songs = {}
 
-artist_name = "Phantogram"
+
 length = 0
 currentdir = os.getcwd()
 
@@ -39,7 +39,8 @@ class SortedListCtrl(wx.ListCtrl, ColumnSorterMixin):
 
 #This "Songs" class runs the actual frame for PyTunes 
 class Songs(wx.Frame):
-
+    artist_name = "Default"
+    album_name = "Default"
     player = pyglet.media.Player()
     player.eos_action = player.EOS_PAUSE
     def __init__(self, parent, id, title):
@@ -49,7 +50,7 @@ class Songs(wx.Frame):
         Images addition to frame
         '''
          #find images in the image folder
-        self.jpgs = GetJpgList("./IMAGES/" + artist_name)
+        self.jpgs = GetJpgList("./IMAGES/" + self.artist_name + "/" + self.album_name)
         self.CurrentJpg = 0
         self.MaxImageSize = 200
 
@@ -176,7 +177,19 @@ class Songs(wx.Frame):
         self.player.queue(s)
         self.player.play()
         os.chdir(currentdir)
-
+        self.artist_name = music[1]
+        self.album_name = music[2]
+        if (os.path.exists("./IMAGES/" + self.artist_name + "/" + self.album_name)):
+            self.jpgs = GetJpgList("./IMAGES/" + self.artist_name + "/" + self.album_name)
+            self.Image.Update()
+            self.SHOWNEXT()
+        else:
+            self.artist_name = "Default"
+            self.album_name = "Default"
+            self.jpgs = GetJpgList("./IMAGES/" + self.artist_name + "/" + self.album_name)
+            self.Image.Update()
+            self.SHOWNEXT()
+            
     def OnSlideScroll(self, event):
         self.current_time = 0
         
