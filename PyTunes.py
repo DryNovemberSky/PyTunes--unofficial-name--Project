@@ -101,9 +101,6 @@ class Songs(wx.Frame):
         ext = wx.Button(leftPanel, -1, 'Exit', size=(100, -1))
         nextpic = wx.Button(leftPanel, -1, "Next Picture", size = (100, -1))
         
-        #slider addition here
-        slid = wx.Slider(rightPanel, -1, value = 0, minValue = 0, maxValue = 500, pos = (-1,-1), size = (250,-1), style = wx.SL_AUTOTICKS | wx.SL_LABELS)
-        slid.SetTickFreq(50,1)
 
         
         self.Bind(wx.EVT_BUTTON, self.Play, id=ply.GetId())
@@ -111,7 +108,7 @@ class Songs(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.Stop, id=stp.GetId())
         self.Bind(wx.EVT_BUTTON, self.ExitApp, id=ext.GetId())
         self.Bind(wx.EVT_BUTTON, self.SHOWNEXT, id = nextpic.GetId())
-        self.Bind(wx.EVT_SCROLL, self.OnSlideScroll)
+        
 
         self.CurrentTime()
 
@@ -125,7 +122,6 @@ class Songs(wx.Frame):
         leftPanel.SetSizer(vbox2)
 
         vbox.Add(self.list, 1, wx.EXPAND | wx.TOP, 3)
-        vbox.Add(slid, 1, wx.EXPAND)
         vbox.Add((-1, 10))
 
          
@@ -190,8 +186,7 @@ class Songs(wx.Frame):
             self.Image.Update()
             self.SHOWNEXT()
             
-    def OnSlideScroll(self, event):
-        self.current_time = 0
+    
         
     def ExitApp(self, event):
         self.player.pause()
