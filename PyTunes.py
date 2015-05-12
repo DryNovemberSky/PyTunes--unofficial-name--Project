@@ -37,10 +37,16 @@ class SortedListCtrl(wx.ListCtrl, ColumnSorterMixin):
     def GetListCtrl(self):
         return self
 
-#This "Songs" class runs the actual frame for PyTunes 
+#This "Songs" class runs the actual frame for PyTunes
+
 class Songs(wx.Frame):
+
+    #Initialize the player to show our default picture
     artist_name = "Default"
     album_name = "Default"
+
+    #Turn on pyglet media player on pause
+    
     player = pyglet.media.Player()
     player.eos_action = player.EOS_PAUSE
     def __init__(self, parent, id, title):
@@ -49,7 +55,8 @@ class Songs(wx.Frame):
         '''
         Images addition to frame
         '''
-         #find images in the image folder
+        #find images in the ALBUMART folder followed by the subfolder corresponding to album names
+        
         self.jpgs = GetJpgList("./ALBUMART/" + self.artist_name + "/" + self.album_name)
         self.CurrentJpg = 0
         self.MaxImageSize = 250
@@ -102,7 +109,8 @@ class Songs(wx.Frame):
         nextpic = wx.Button(leftPanel, -1, "Next Picture", size = (100, -1))
         
 
-        
+
+        #Bind each button to a certain function, giving the buttons functionality
         self.Bind(wx.EVT_BUTTON, self.Play, id=ply.GetId())
         self.Bind(wx.EVT_BUTTON, self.Pause, id=pse.GetId())
         self.Bind(wx.EVT_BUTTON, self.Stop, id=stp.GetId())
@@ -110,8 +118,8 @@ class Songs(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.SHOWNEXT, id = nextpic.GetId())
         
 
-        self.CurrentTime()
-
+    
+        #Add the buttons to the left vertical box, 2
     
         vbox2.Add(ply, 0, wx.TOP, 5)
         vbox2.Add(pse)
@@ -127,7 +135,8 @@ class Songs(wx.Frame):
          
         rightPanel.SetSizer(vbox)
 
-        
+
+        #Add panels to horizontal box so we can actually see buttons and the picture
         
         hbox.Add(leftPanel, 0, wx.EXPAND | wx.RIGHT, 5)
         hbox.Add(rightPanel, 1, wx.EXPAND)
@@ -149,22 +158,32 @@ class Songs(wx.Frame):
 
         self.Centre()
         self.Show(True)
+
+    #function definition for buttons
         
     def Play(self, event):
+        #Play the pyglet media player
         self.player.play()
         event.Skip()
 
     def Pause(self, event):
+        #Pause playback
         self.player.pause()
         event.Skip()
         
     def Stop(self, event):
+        #Stop playback
+        #When stop is called, playback should stop and open up a new player for music to be sent to
         self.player.pause()
         self.player = pyglet.media.Player()
            
     def OnDoubleClick(self, event):
         self.player.pause()
+        #Open a new player on double click
+        
         self.player = pyglet.media.Player()
+
+        #Change directory to MP3s to look for selection
         os.chdir('./MP3s/')
         selection = self.list.GetFocusedItem()
         music = songs[selection]
@@ -172,13 +191,18 @@ class Songs(wx.Frame):
         s = pyglet.resource.media(song)
         self.player.queue(s)
         self.player.play()
+        
         os.chdir(currentdir)
         self.artist_name = music[1]
         self.album_name = music[2]
+
+        #Load the album artwork if the directory contains an image for that album
+        
         if (os.path.exists("./ALBUMART/" + self.artist_name + "/" + self.album_name)):
             self.jpgs = GetJpgList("./ALBUMART/" + self.artist_name + "/" + self.album_name)
             self.Image.Update()
             self.SHOWNEXT()
+        #if our directory does not contain an image, place our default image in the picture box
         else:
             self.artist_name = "Default"
             self.album_name = "Default"
@@ -192,16 +216,7 @@ class Songs(wx.Frame):
         self.player.pause()
         self.Close()
 
-
-    def CurrentTime(self):
-        while self.player.play():
-            time.sleep(1)
-            self.current_time = self.current_time + 1
-
-            val = self.current_time
-
-            txt1.SetLabel(str(val))
-            
+    #SHOWNEXT allows us to switch images.        
     def SHOWNEXT(self, event = None):
         PIC = wx.Image(self.jpgs[self.CurrentJpg], wx.BITMAP_TYPE_JPEG)
 
@@ -226,11 +241,12 @@ class Songs(wx.Frame):
         if self.CurrentJpg > len(self.jpgs) - 1:
             self.CurrentJpg = 0
 
+#Look for jpg files and return a list of them
 def GetJpgList(dir):
     jpgs = [f for f in os.listdir(dir) if f[-4:] == ".jpg"]
     return [os.path.join(dir, f) for f in jpgs]
 
-
+#Look for MP3 files and return a list of them. Also create a list that contains the metadata for these songs.
 def GetMP3List(dict, dir):
         mp3 = [f for f in os.listdir(dir) if f[-4:] == ".mp3"]
         os.chdir(dir)
@@ -244,6 +260,7 @@ def GetMP3List(dict, dir):
             x += 1
         os.chdir(currentdir)
 
+#Initialization
 if __name__ == '__main__':
     GetMP3List(songs, "./MP3s/")
     app = wx.App()
